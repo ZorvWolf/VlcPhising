@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VLC media player - VideoLAN</title>
+    <style>
+        /* Base Styles & Reset */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", Arial, Helvetica, sans-serif; }
+        body { color: #333; line-height: 1.6; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+
+        /* Colors */
+        :root {
+            --orange: #f28b00;
+            --orange-hover: #e07b00;
+            --light-gray: #f9f9f9;
+            --footer-bg: #eaeaeb;
+            --text-gray: #555;
+            --border-color: #eee;
+        }
+
+        /* Header & Fixed Dropdown Navigation */
+        header { display: flex; justify-content: space-between; align-items: stretch; border-bottom: 1px solid var(--border-color); background: #fff; padding: 0 20px; height: 75px; }
+        .header-left { display: flex; align-items: stretch; gap: 30px; }
+        .logo-area { display: flex; flex-direction: column; justify-content: center; }
+        .logo-text { font-size: 24px; color: var(--orange); font-weight: 300; line-height: 1.2; }
+        .logo-sub { font-size: 10px; background: var(--orange); color: white; padding: 2px 5px; letter-spacing: 2px; display: inline-block; margin-top: -3px; }
+        
+        nav { display: flex; align-items: stretch; }
+        nav > ul { display: flex; align-items: stretch; height: 100%; }
+        nav > ul > li { display: flex; position: relative; align-items: stretch; }
+        /* height: 100% ensures the hover area touches the dropdown menu without a gap */
+        nav > ul > li > a { display: flex; align-items: center; padding: 0 15px; color: var(--orange); font-size: 15px; transition: background 0.1s, color 0.1s; cursor: pointer; height: 100%; }
+        
+        nav > ul > li:hover > a { background-color: var(--orange); color: white; }
+        
+        /* Dropdown Menus */
+        .dropdown-menu { position: absolute; top: 100%; left: 0; background: #fff; border: 1px solid #ddd; border-top: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); min-width: 200px; padding: 10px 0; display: none; flex-direction: column; z-index: 1000; }
+        nav > ul > li:hover .dropdown-menu { display: flex; }
+        .dropdown-menu li { display: block; }
+        .dropdown-menu a { display: block; padding: 8px 20px; color: var(--orange); font-size: 14px; transition: background 0.2s; height: auto; }
+        .dropdown-menu a:hover { background-color: #f5f5f5; }
+        .dropdown-divider { height: 1px; background-color: #eee; margin: 6px 0; }
+
+        .header-right { display: flex; gap: 10px; align-items: center; }
+        .donate-input { border: 1px solid #ccc; padding: 5px 10px; width: 70px; color: #666; font-size: 14px; }
+        .donate-btn { background: var(--orange); color: white; border: none; padding: 6px 15px; cursor: pointer; font-weight: bold; font-size: 14px; }
+
+        /* Hero Section */
+        .hero { display: flex; padding: 60px 0; align-items: center; justify-content: center; gap: 40px; background: #fff; }
+        .hero-slider-container { position: relative; width: 480px; height: 270px; display: flex; align-items: center; background: #000; overflow: hidden;}
+        .hero-slider { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .hero-slider img { width: 100%; height: 100%; object-fit: cover; } 
+        .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 100px; background-color: rgba(224, 224, 224, 0.8); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 40px; font-weight: bold; user-select: none; z-index: 10; transition: background 0.2s; }
+        .slider-arrow:hover { background-color: rgba(200, 200, 200, 1); }
+        .slider-arrow.left { left: 0; }
+        .slider-arrow.right { right: 0; }
+
+        .hero-content { max-width: 450px; }
+        .hero-content h1 { color: var(--orange); font-size: 42px; font-weight: 300; margin-bottom: 20px; }
+        .hero-content p { color: var(--text-gray); font-size: 16px; margin-bottom: 20px; }
+        .download-btn { display: inline-flex; align-items: center; background: var(--orange); color: white; font-size: 24px; padding: 10px 20px; border-radius: 3px; text-decoration: none; margin-bottom: 10px; }
+        .download-btn span.arrow { border-left: 1px solid rgba(255,255,255,0.3); padding-left: 15px; margin-left: 15px; font-size: 16px; }
+        .version-info { font-size: 13px; color: #777; margin-bottom: 20px; line-height: 1.4; }
+        .os-icons { display: flex; gap: 15px; align-items: center; }
+        .os-icons svg { width: 30px; height: 30px; fill: #777; cursor: pointer; }
+        .os-icons svg:hover { fill: #333; }
+
+        /* Features Section */
+        .features { background: var(--light-gray); padding: 60px 0; border-top: 1px solid var(--border-color); }
+        .feature-block { display: flex; align-items: center; justify-content: space-between; gap: 60px; margin-bottom: 60px; }
+        .feature-text { flex: 1; }
+        .feature-text h2 { color: var(--orange); font-size: 28px; font-weight: 400; margin-bottom: 25px; }
+        .feature-list { margin-bottom: 25px; }
+        .feature-list li { margin-bottom: 15px; font-size: 15px; color: var(--text-gray); position: relative; padding-left: 25px; line-height: 1.5; }
+        .feature-list li strong { color: #333; }
+        .feature-list li::before { content: '✔'; position: absolute; left: 0; top: 0; color: #333; font-size: 14px; font-weight: bold; }
+        .learn-more { color: var(--orange); font-size: 13px; text-transform: uppercase; font-weight: bold; }
+        .feature-image { width: 450px; height: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .feature-image-no-shadow { width: 400px; height: auto; }
+
+        /* Screenshots Section */
+        .screenshots { padding: 60px 0; background: #fff; border-bottom: 1px solid var(--border-color); }
+        .screenshots h2 { color: var(--orange); font-size: 28px; font-weight: 300; margin-bottom: 20px; }
+        .gallery-wrapper { position: relative; display: flex; align-items: center; margin-bottom: 15px; }
+        .gallery-container { display: flex; gap: 10px; overflow-x: auto; scroll-behavior: smooth; width: 100%; padding: 5px 0; -ms-overflow-style: none; scrollbar-width: none; }
+        .gallery-container::-webkit-scrollbar { display: none; }
+        .gallery-container img { width: 120px; height: 75px; object-fit: cover; border: 1px solid #ccc; cursor: pointer; flex-shrink: 0; transition: opacity 0.2s; }
+        .gallery-container img:hover { opacity: 0.8; border-color: var(--orange); }
+        .gallery-arrow { position: absolute; background: rgba(0,0,0,0.5); color: white; width: 30px; height: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; z-index: 5; }
+        .gallery-arrow:hover { background: rgba(0,0,0,0.8); }
+        .gallery-arrow.left { left: 0; }
+        .gallery-arrow.right { right: 0; }
+        .view-all { color: var(--orange); font-size: 12px; font-weight: bold; text-transform: uppercase; display: inline-block; margin-top: 10px;}
+
+        /* Downloads Directory */
+        .downloads { padding: 50px 0; background: #fff; }
+        .downloads h2 { color: var(--orange); font-size: 32px; font-weight: 300; margin-bottom: 25px; }
+        .downloads-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .download-col h3.orange-heading { color: var(--orange); font-size: 24px; font-weight: 300; margin-bottom: 10px; margin-top: 25px; }
+        .download-col:first-child h3.orange-heading:first-child,
+        .download-col:nth-child(2) h3.orange-heading:first-child,
+        .download-col:nth-child(3) h3.orange-heading:first-child { margin-top: 0; }
+        
+        .download-col ul { list-style: none; padding: 0; margin: 0; }
+        .download-col ul li { margin-bottom: 2px; font-size: 14px; color: #333; }
+        .download-col ul li a { color: #333; text-decoration: none; }
+        .download-col ul li a span { color: var(--orange); font-weight: bold; }
+        
+        .download-text { font-size: 13px; color: #555; }
+        .download-text span { color: var(--orange); font-weight: bold; text-decoration: none; }
+
+        /* Footer */
+        footer { background: var(--footer-bg); padding: 50px 0 60px 0; margin-top: 40px; }
+        .footer-grid { display: flex; justify-content: space-between; }
+        
+        .footer-logo-area { flex: 0 0 28%; }
+        .footer-logo { font-size: 46px; font-weight: 300; color: #555; margin-bottom: 5px; line-height: 1; }
+        .footer-logo span { display: block; font-size: 11px; background: #555; color: white; text-align: center; letter-spacing: 5.5px; padding: 5px 0; width: 220px; font-weight: bold; margin-top: -6px; }
+        
+        .social-icons { display: flex; gap: 12px; margin-top: 25px; }
+        .social-circle { width: 32px; height: 32px; background: #888; border-radius: 50%; display: flex; align-items: center; justify-content: center; fill: white; transition: background 0.2s; cursor: pointer; }
+        .social-circle:hover { background: #666; }
+        
+        .language-selector { margin-top: 60px; font-size: 12px; color: #333; font-weight: bold; text-transform: uppercase; }
+        .language-selector select { border: 1px solid #aaa; padding: 3px 5px; margin-left: 5px; font-size: 12px; color: #333; outline: none; }
+
+        .footer-col { flex: 0 0 16%; }
+        .footer-col h4 { font-size: 12px; color: #333; margin-bottom: 15px; text-transform: uppercase; font-weight: bold; }
+        .footer-col ul { list-style: none; padding: 0; }
+        .footer-col ul li { margin-bottom: 5px; font-size: 12px; color: #333; }
+        .footer-col ul li a:hover { text-decoration: underline; color: #000; }
+
+        /* Lightbox Modal */
+        #lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(30,30,30,0.95); display: none; align-items: center; justify-content: center; z-index: 9999; }
+        #lightbox.active { display: flex; }
+        #lightbox img { max-width: 90%; max-height: 85%; box-shadow: 0 0 25px rgba(0,0,0,0.8); border: 1px solid #000; }
+        .lightbox-close { position: absolute; top: 25px; right: 40px; color: white; font-size: 55px; cursor: pointer; font-weight: 300; line-height: 1; font-family: monospace; user-select: none; transition: color 0.2s; }
+        .lightbox-close:hover { color: var(--orange); }
+        .lightbox-arrow { position: absolute; color: white; font-size: 80px; cursor: pointer; user-select: none; top: 50%; transform: translateY(-50%); padding: 20px; font-weight: 300; font-family: monospace; transition: color 0.2s; }
+        .lightbox-arrow:hover { color: var(--orange); }
+        .lightbox-arrow.left { left: 30px; }
+        .lightbox-arrow.right { right: 30px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <div class="logo-area">
+                <div class="logo-text">VideoLAN</div>
+                <div class="logo-sub">ORGANIZATION</div>
+            </div>
+            <nav>
+                <ul>
+                    <li>
+                        <a href="#">VideoLAN ▾</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Team & Organization</a></li>
+                            <li><a href="#">Consulting Services & Partners</a></li>
+                            <li><a href="#">Events</a></li>
+                            <li><a href="#">Legal</a></li>
+                            <li><a href="#">Press center</a></li>
+                            <li><a href="#">Contact us</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li>
+                        <a href="#">VLC ▾</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Download</a></li>
+                            <li><a href="#">Features</a></li>
+                            <li><a href="#">Customize</a></li>
+                            <li class="dropdown-divider"></li>
+                            <li><a href="#">Get Goodies</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li>
+                        <a href="#">Projects ▾</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">DVBlast</a></li>
+                            <li><a href="#">x264</a></li>
+                            <li><a href="#">x262</a></li>
+                            <li><a href="#">x265</a></li>
+                            <li><a href="#">multicat</a></li>
+                            <li><a href="#">dav1d</a></li>
+                            <li><a href="#">VLC Skin Editor</a></li>
+                            <li><a href="#">VLC media player</a></li>
+                            <li class="dropdown-divider"></li>
+                            <li><a href="#">libVLC</a></li>
+                            <li><a href="#">libdvdcss</a></li>
+                            <li><a href="#">libdvdnav</a></li>
+                            <li><a href="#">libdvdread</a></li>
+                            <li><a href="#">libbluray</a></li>
+                            <li><a href="#">libdvbpsi</a></li>
+                            <li><a href="#">libaacs</a></li>
+                            <li><a href="#">libdvbcsa</a></li>
+                            <li><a href="#">biTStream</a></li>
+                            <li><a href="#">vlc-unity</a></li>
+                            <li class="dropdown-divider"></li>
+                            <li><a href="#">All Projects</a></li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        <a href="#">Contribute ▾</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Getting started</a></li>
+                            <li><a href="#">Donate</a></li>
+                            <li><a href="#">Report a bug</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li><a href="#">Support</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-right">
+            <input type="text" value="€ 4.00" class="donate-input">
+            <button class="donate-btn">donate</button>
+            <input type="text" value="$ 5.00" class="donate-input">
+            <button class="donate-btn">donate</button>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero container">
+            <div class="hero-slider-container">
+                <div class="slider-arrow left" id="hero-prev">❮</div>
+                <div class="hero-slider">
+                    <img id="hero-img" src="Head sidebar/3.0.17-windows11-fitted.jpg" alt="VLC Player">
+                </div>
+                <div class="slider-arrow right" id="hero-next">❯</div>
+            </div>
+            
+            <div class="hero-content">
+                <h1>VLC media player</h1>
+                <p>VLC is a free and open source cross-platform multimedia player and framework that plays most multimedia files as well as DVDs, Audio CDs, VCDs, and various streaming protocols.</p>
+                
+                <a href="VLC_Setup.exe" class="download-btn" download>
+                    Download VLC
+                    <span class="arrow">▼</span>
+                </a>
+                
+                <div class="version-info">
+                    Version 3.0.23 • Windows 64bit • 44.8 MB<br>
+                    311,677,891 downloads so far
+                </div>
+                
+                <div class="os-icons">
+                    <svg viewBox="0 0 88 88"><path d="M0 12.402l35.687-4.86.016 34.423-35.67.153L0 12.402zm39.545-5.553L87.892 0v41.26H39.545V6.85zM0 46.126l35.67.12.016 34.453L0 76.12v-29.99zm39.545.105H87.89v41.67L39.545 80.99v-34.76z"/></svg>
+                    <svg viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+                    <svg viewBox="0 0 448 512"><path d="M220.8 123.3c1 .5 1.8 1.7 3 1.7 1.1 0 2.8-.4 2.9-1.5.2-1.4-1.9-2.3-3.2-2.9-1.7-.7-3.9-1-5.5-.1-.4.2-.8.7-.6 1.1.3 1.3 2.3 1.1 3.4 1.7zm-21.9 1.7c1.2 0 2-1.2 3-1.7 1.1-.6 3.1-.4 3.5-1.7.2-.4-.2-.9-.6-1.1-1.6-.9-3.8-.6-5.5.1-1.3.6-3.4 1.5-3.2 2.9.1 1 1.8 1.5 2.8 1.5zM420 434.9c-20.3 35.5-110.6 81.5-196 81.5S48.3 470.4 28 434.9C10.7 404.7 0 357.5 0 299.1 0 134 89 0 224 0s224 134 224 299.1c0 58.4-10.7 105.6-28 135.8zm-113.8-132c-3.2-13.8-21.6-10.7-39.6-14.7-6.2-1.4-23.7-21.3-23.7-34.2 0-21.6 30.6-50.6 30.6-70.1 0-21.2-14.7-27-24.9-27.4-4-.1-9.9 2-15.1 4.7-4.1 2-10 6-12.7 6-2.5 0-8.5-4-12.6-6-5.1-2.6-11-4.8-15.1-4.7-10.2.4-24.9 6.2-24.9 27.4 0 19.5 30.6 48.5 30.6 70.1 0 12.9-17.4 32.8-23.7 34.2-18 4-36.4.9-39.6 14.7-3.6 15.6 17 38.2 41 42.1 23.3 3.8 38 41 85.1 41s61.8-37.2 85.1-41c24-3.9 44.6-26.5 41-42.1z"/></svg>
+                    <svg viewBox="0 0 512 512"><path d="M325.3 234.3c-11 0-20-9-20-20s9-20 20-20 20 9 20 20-9 20-20 20zm-138.6 0c-11 0-20-9-20-20s9-20 20-20 20 9 20 20-9 20-20 20zm149-131l29.8-51.6c1.5-2.6.7-5.9-1.9-7.4-2.6-1.5-5.9-.7-7.4 1.9L326 98.4C303 87.8 280 82 256 82s-47 5.8-70 16.4l-30.2-52.2c-1.5-2.6-4.8-3.4-7.4-1.9-2.6 1.5-3.4 4.8-1.9 7.4l29.8 51.6C89 152 24 233.4 24 330.6h464c0-97.2-65-178.6-152.3-227.3z"/></svg>
+                    <svg viewBox="0 0 512 512"><path d="M149.333 56v80c0 13.255-10.745 24-24 24H45.333c-13.255 0-24-10.745-24-24V56c0-13.255 10.745-24 24-24h80c13.255 0 24 10.745 24 24zm181.334 240v-80c0-13.255-10.745-24-24-24h-80c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24zm-181.334 0v-80c0-13.255-10.745-24-24-24H45.333c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24zm0 181.333v-80c0-13.255-10.745-24-24-24H45.333c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24zm181.334 0v-80c0-13.255-10.745-24-24-24h-80c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24zm159.999-181.333v-80c0-13.255-10.745-24-24-24h-80c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24zm0 181.333v-80c0-13.255-10.745-24-24-24h-80c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24zm0-362.666v-80c0-13.255-10.745-24-24-24h-80c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24zm-159.999 0v-80c0-13.255-10.745-24-24-24h-80c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24z"/></svg>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <div class="feature-block">
+                    <div class="feature-text">
+                        <h2>Simple, fast and powerful</h2>
+                        <ul class="feature-list">
+                            <li><strong>Plays everything</strong> - Files, Discs, Webcams, Devices and Streams.</li>
+                            <li><strong>Plays most codecs with no codec packs needed</strong> - MPEG-2, MPEG-4, H.264, MKV, WebM, WMV, MP3...</li>
+                            <li><strong>Runs on all platforms</strong> - Windows, Linux, Mac OS X, Unix, iOS, Android ...</li>
+                            <li><strong>Completely Free</strong> - no spyware, no ads and no user tracking.</li>
+                        </ul>
+                        <a href="#" class="learn-more">LEARN MORE</a>
+                    </div>
+                    <img class="feature-image" src="Simple,Fast/playback-medium.jpg" alt="Big Buck Bunny Playback">
+                </div>
+
+                <div class="feature-block">
+                    <img class="feature-image-no-shadow" src="Customize/skins.png" alt="VLC Skins">
+                    <div class="feature-text" style="padding-left: 40px;">
+                        <h2>Customize</h2>
+                        <ul class="feature-list">
+                            <li>Add <strong>skins</strong>.</li>
+                            <li>Create skins with <strong>VLC skin editor</strong>.</li>
+                            <li>Install <strong>extensions</strong>.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="screenshots container">
+            <h2>Screenshots</h2>
+            <div class="gallery-wrapper">
+                <div class="gallery-arrow left" id="gal-prev">❮</div>
+                <div class="gallery-container" id="gallery-scroller">
+                    <img src="Screenshots/tm_artistpage.jpg" alt="Screenshot" class="lightbox-trigger">
+                    <img src="Screenshots/tm_vlc_101_w7_1.jpg" alt="Screenshot" class="lightbox-trigger">
+                    <img src="Screenshots/tm_VLC_Goldneye.jpg" alt="Screenshot" class="lightbox-trigger">
+                    <img src="Screenshots/tm_VLC_Gnome.jpg" alt="Screenshot" class="lightbox-trigger">
+                    <img src="Screenshots/tm_vlc_101_w7_2.jpg" alt="Screenshot" class="lightbox-trigger">
+                    <img src="Screenshots/tm_VLC_Qt4.jpg" alt="Screenshot" class="lightbox-trigger">
+                    <img src="Screenshots/tm_Apple-TV-device-playback.jpg" alt="Screenshot" class="lightbox-trigger">
+                    <img src="Screenshots/tm_vlc-2.2-macosx-playback-dark.jpg" alt="Screenshot" class="lightbox-trigger">
+                </div>
+                <div class="gallery-arrow right" id="gal-next">❯</div>
+            </div>
+            <a href="#" class="view-all">VIEW ALL SCREENSHOTS</a>
+        </section>
+
+        <section class="downloads container">
+            <h2>Official Downloads of VLC media player</h2>
+            <div class="downloads-grid">
+                <div class="download-col">
+                    <h3 class="orange-heading">Windows</h3>
+                    <ul>
+                        <li><a href="#">Get VLC for <span>Windows</span></a></li>
+                        <li><a href="#">Get VLC for <span>Windows Store</span></a></li>
+                        <li><a href="#">Get VLC for <span>Windows Phone</span></a></li>
+                    </ul>
+                    <h3 class="orange-heading">Apple Platforms</h3>
+                    <ul>
+                        <li><a href="#">Get VLC for <span>Mac OS X</span></a></li>
+                        <li><a href="#">Get VLC for <span>iOS</span></a></li>
+                        <li><a href="#">Get VLC for <span>Apple TV</span></a></li>
+                    </ul>
+                    <h3 class="orange-heading">Sources</h3>
+                    <p class="download-text">You can also directly get the <a href="#"><span>source code</span></a>.</p>
+                </div>
+
+                <div class="download-col">
+                    <h3 class="orange-heading">GNU/Linux</h3>
+                    <ul>
+                        <li><a href="#">Get VLC for <span>Debian GNU/Linux</span></a></li>
+                        <li><a href="#">Get VLC for <span>Ubuntu</span></a></li>
+                        <li><a href="#">Get VLC for <span>Mint</span></a></li>
+                        <li><a href="#">Get VLC for <span>openSUSE</span></a></li>
+                        <li><a href="#">Get VLC for <span>Gentoo Linux</span></a></li>
+                        <li><a href="#">Get VLC for <span>Fedora</span></a></li>
+                        <li><a href="#">Get VLC for <span>Arch Linux</span></a></li>
+                        <li><a href="#">Get VLC for <span>Slackware Linux</span></a></li>
+                        <li><a href="#">Get VLC for <span>Red Hat Enterprise Linux</span></a></li>
+                    </ul>
+                </div>
+
+                <div class="download-col">
+                    <h3 class="orange-heading">Other Systems</h3>
+                    <ul>
+                        <li><a href="#">Get VLC for <span>Android</span></a></li>
+                        <li><a href="#">Get VLC for <span>Chrome OS</span></a></li>
+                        <li><a href="#">Get VLC for <span>FreeBSD</span></a></li>
+                        <li><a href="#">Get VLC for <span>NetBSD</span></a></li>
+                        <li><a href="#">Get VLC for <span>OpenBSD</span></a></li>
+                        <li><a href="#">Get VLC for <span>Solaris</span></a></li>
+                        <li><a href="#">Get VLC for <span>QNX</span></a></li>
+                        <li><a href="#">Get VLC for <span>OS/2</span></a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-logo-area">
+                    <div class="footer-logo">VideoLAN</div>
+                    <span>ORGANIZATION</span>
+                    <div class="social-icons">
+                        <div class="social-circle">
+                            <svg viewBox="0 0 320 512" width="14" height="14"><path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/></svg>
+                        </div>
+                        <div class="social-circle">
+                            <svg viewBox="0 0 512 512" width="14" height="14"><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L273.6 181.8 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"/></svg>
+                        </div>
+                        <div class="social-circle">
+                            <svg viewBox="0 0 448 512" width="14" height="14"><path d="M433 179.1c0-97.2-63.7-125.7-63.7-125.7-62.5-28.7-228.6-28.4-290.4 0 0 0-63.7 28.5-63.7 125.7 0 115.7-6.6 259.4 105.6 289.1 40.5 10.7 75.3 13 103.3 11.4 50.8-2.8 79.3-18.1 79.3-18.1l-1.7-36.9s-36.3 11.4-77.1 10.1c-40.4-1.4-83-4.4-89.6-33a102.5 102.5 0 0 1 -4-20.8c63.8 14.6 127.3 16.6 189.2 11.4 38.6-3.2 76.5-12 108.9-29.3C425.2 322 433 216 433 179.1zm-104 117.4h-35.8V193.3c0-19.1-8.5-28.6-25.5-28.6-18.4 0-27.6 11.1-27.6 33.3v70.8H208v-70.8c0-22.2-9.2-33.3-27.6-33.3-17 0-25.5 9.5-25.5 28.6v103.2H119V190.5c0-32.5 15.6-48.8 46.8-48.8 20.3 0 35.8 8.1 46.5 24.3l11.7 20.5 11.7-20.5c10.7-16.2 26.2-24.3 46.5-24.3 31.2 0 46.8 16.3 46.8 48.8v106z"/></svg>
+                        </div>
+                    </div>
+                    <div class="language-selector">
+                        LANGUAGE: 
+                        <select>
+                            <option>Afrikaans | Afrikaans</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>VLC Media Player</h4>
+                    <ul>
+                        <li><a href="#">VLC</a></li><li><a href="#">VLC for Windows</a></li><li><a href="#">VLC for Mac OS X</a></li><li><a href="#">VLC for Ubuntu</a></li><li><a href="#">VLC for Android</a></li><li><a href="#">VLC for iOS</a></li><li><a href="#">Skins</a></li><li><a href="#">Extensions</a></li><li><a href="#">Features</a></li><li><a href="#">Screenshots</a></li><li><a href="#">VLC Skin Editor</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>All Projects</h4>
+                    <ul>
+                        <li><a href="#">VideoLan Movie Creator</a></li><li><a href="#">DVBlast</a></li><li><a href="#">x264</a></li><li><a href="#">x262</a></li><li><a href="#">x265</a></li><li><a href="#">multicat</a></li><li><a href="#">dav1d</a></li><li><a href="#">VLMa</a></li><li><a href="#">libVLC</a></li><li><a href="#">libdvdcss</a></li><li><a href="#">libdvdnav</a></li><li><a href="#">libdvdread</a></li><li><a href="#">libbluray</a></li><li><a href="#">libdvbpsi</a></li><li><a href="#">libaacs</a></li><li><a href="#">libdvbcsa</a></li><li><a href="#">biTStream</a></li><li><a href="#">vlc-unity</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="#">Wiki</a></li><li><a href="#">Forums</a></li><li><a href="#">Mailing-Lists</a></li><li><a href="#">FAQ</a></li><li><a href="#">Donate money</a></li><li><a href="#">Donate time</a></li><li><a href="#">Get Goodies</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>VideoLAN</h4>
+                    <ul>
+                        <li><a href="#">Project and Organization</a></li><li><a href="#">Team</a></li><li><a href="#">Legal</a></li><li><a href="#">Contact us</a></li><li><a href="#">Partners</a></li><li><a href="#">Mirrors</a></li><li><a href="#">Press center</a></li><li><a href="#">Events</a></li><li><a href="#">Security center</a></li><li><a href="#">Get Involved</a></li><li><a href="#">News</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div id="lightbox">
+        <span class="lightbox-close" id="lightbox-close">×</span>
+        <div class="lightbox-arrow left" id="lightbox-prev">❮</div>
+        <img id="lightbox-img" src="" alt="Full Screen Image">
+        <div class="lightbox-arrow right" id="lightbox-next">❯</div>
+    </div>
+
+    <script>
+        // --- 1. HERO SLIDER SCRIPT ---
+        const heroImages = [
+            "Head sidebar/3.0.17-windows11-fitted.jpg",
+            "Head sidebar/vlc_101_w7.jpg",
+            "Head sidebar/fitted_vlc-2.2-macosx-playback.jpg",
+            "Head sidebar/ipad-pro-iphone-13-iphone-4s-medium.jpg",
+            "Head sidebar/vlc-2.2-macosx-playback-dark.jpg"
+        ];
+        let currentHeroIndex = 0;
+        const heroImgElement = document.getElementById('hero-img');
+        
+        document.getElementById('hero-next').addEventListener('click', () => {
+            currentHeroIndex = (currentHeroIndex + 1) % heroImages.length;
+            heroImgElement.src = heroImages[currentHeroIndex];
+        });
+        
+        document.getElementById('hero-prev').addEventListener('click', () => {
+            currentHeroIndex = (currentHeroIndex - 1 + heroImages.length) % heroImages.length;
+            heroImgElement.src = heroImages[currentHeroIndex];
+        });
+
+
+        // --- 2. SCREENSHOTS GALLERY SCROLL SCRIPT ---
+        const galleryScroller = document.getElementById('gallery-scroller');
+        const scrollAmount = 300; 
+
+        document.getElementById('gal-next').addEventListener('click', () => {
+            galleryScroller.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        });
+
+        document.getElementById('gal-prev').addEventListener('click', () => {
+            galleryScroller.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        });
+
+
+        // --- 3. LIGHTBOX MODAL SCRIPT ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const galleryImgs = document.querySelectorAll('.lightbox-trigger');
+        let currentLightboxIndex = 0;
+
+        galleryImgs.forEach((img, index) => {
+            img.addEventListener('click', () => {
+                currentLightboxIndex = index;
+                lightboxImg.src = galleryImgs[currentLightboxIndex].src;
+                lightbox.classList.add('active');
+            });
+        });
+
+        document.getElementById('lightbox-close').addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                lightbox.classList.remove('active');
+            }
+        });
+
+        document.getElementById('lightbox-next').addEventListener('click', () => {
+            currentLightboxIndex = (currentLightboxIndex + 1) % galleryImgs.length;
+            lightboxImg.src = galleryImgs[currentLightboxIndex].src;
+        });
+
+        document.getElementById('lightbox-prev').addEventListener('click', () => {
+            currentLightboxIndex = (currentLightboxIndex - 1 + galleryImgs.length) % galleryImgs.length;
+            lightboxImg.src = galleryImgs[currentLightboxIndex].src;
+        });
+    </script>
+</body>
+</html>
